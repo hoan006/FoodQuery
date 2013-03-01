@@ -1,0 +1,93 @@
+<h1>Food Query</h1>
+<%= form_tag url_for(:controller => "query", :action => :index), :method => :get do %>
+	Group:  <%= text_field_tag 'group', @group%>
+	<br/>
+	Brand:  <%= text_field_tag 'brand', @brand%>
+	<br/>
+	Food name:  <%= text_field_tag 'name', @name%>
+	<br/>
+	Serving type: <%= text_field_tag 'serve_type', @serve_type %>
+	<br/>
+	Calories from: <%= text_field_tag 'from_calories', @from_calories %> to: <%= text_field_tag 'to_calories', @to_calories %>
+	<br/>
+	<%= submit_tag "Query" %>
+	<%= label_tag nil, @time_cost %>
+<% end %>
+
+<style type="text/css">
+th {
+	text-align: center;
+}
+
+td {
+	margin-left: 10px;
+	padding-right: 10px;
+	padding-top: 5px;
+	max-width: 400px;
+	text-align: center;
+}
+
+table.serving {
+	width: 600px;
+	border-collapse: collapse;
+}
+
+table.serving tr {
+	border-bottom: 1px solid black;
+}
+
+table.serving tr:last-child {
+	border-bottom: 0px;
+}
+
+table.serving td {
+	margin: 0px;
+	padding: 0px;
+}
+	
+</style>
+
+<div id="result">
+	<table border="1">
+		<tr>
+			<th>Source</th>
+			<th>Group</th>
+			<th>Brand</th>
+			<th>Name</th>
+			<th><table class="serving"><tr>
+				<td>Serving type</td>
+				<td width="20%">Serving size</td>
+				<td width="12%">Calories</td>
+				<td width="12%">Fat</td>
+				<td width="12%">Carbs</td>
+				<td width="12%">Protein</td>
+			</tr></table></th>
+			<th>Link</th>
+		</tr>
+<% foods = @foods.select{|f| (f.serving_ids & @serving_ids).present?} %>
+<% foods.each do |food| %>
+	<tr>
+		<td><%= food.source %></td>
+		<td><%= food.group %></td>
+		<td><%= food.brand %></td>
+		<td><%= food.name %></td>
+		<td><table class="serving">
+		<% food.servings.each do |serving| %>
+			<% if @serving_ids.include?(serving.id) %>
+				<tr>
+					<td><%= serving.name %></td>
+					<td width="20%"><%= serving.size %></td>
+					<td width="12%"><%= display_value(serving.calories) %></td>
+					<td width="12%"><%= display_value(serving.fat) %></td>
+					<td width="12%"><%= display_value(serving.carbohydrates) %></td>
+					<td width="12%"><%= display_value(serving.protein) %></td>
+				</tr>
+			<% end %>
+		<% end %>
+		</table></td>
+		<td><a href="<%= food.link %>" target="_blank">Link</a></td>
+	</tr>
+<% end if @foods.present? %>
+</div>
+
+<%= will_paginate @foods if @foods.present? %>
